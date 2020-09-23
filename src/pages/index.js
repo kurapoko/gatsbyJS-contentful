@@ -1,26 +1,53 @@
 import React from "react"
+import { graphql, useStaticQuery } from "gatsby"
 import Layout from "../components/layout"
 import Kv from "../components/kv"
 import BlogItem from "../components/BlogItem"
 import { Container, Row, Col} from 'react-bootstrap';
 
-const IndexPage = () => (
-  <Layout>
+const IndexPage = () => {
+  const data = useStaticQuery(graphql`
+    query {
+      allMarkdownRemark {
+        edges {
+          node {
+            frontmatter {
+              data
+              title
+              thumbnail {
+                childImageSharp {
+                  fluid {
+                    src
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `)
+  console.log('data', data);
+  return (
+    <Layout>
     <Kv />
     <Container>
       <Row>
-        <Col sm={4}>
-          <BlogItem />
-        </Col>
-        <Col sm={4}>
-          <BlogItem />
-        </Col>
-        <Col sm={4}>
-          <BlogItem />
-        </Col>
+        {
+          data.allMarkdownRemark.edges.map((edge, index) => (
+            <Col sm={4} key={index}>
+              <BlogItem
+                title={edge.node.frontmatter.title}
+                data={edge.node.frontmatter.data}
+                src={edge.node.frontmatter.thumbnail.childImageSharp.fluid.src}/>
+            </Col>
+          ))
+        }
+
       </Row>
     </Container>
   </Layout>
-)
+  )
+}
 
 export default IndexPage
